@@ -249,7 +249,7 @@ gp(p, tooltip = "text")
 ### Column {width="55%"}
 
 ```{r}
-#| title: "대륙별 기대수명: 국가 비가중 ↔ 1인 인구가중 (2007)"
+#| title: "대륙별 기대수명 (2007) — 회색●=국가 비가중 · 색●=1인 인구가중 (녹↑/적↓)"
 cmp2 <- cmp %>% mutate(tip = paste0(continent, "<br>비가중 ", round(비가중, 1),
                                     " · 가중 ", round(인구가중, 1),
                                     "<br><b>", sprintf("%+.1f", 차이), "년</b>"))
@@ -259,8 +259,7 @@ p <- ggplot(cmp2, aes(y = reorder(continent, 인구가중))) +
   geom_point(aes(x = 비가중), color = grey_pt, size = 3.2) +
   geom_point(aes(x = 인구가중, color = 방향, text = tip), size = 3.6) +
   scale_color_manual(values = c("가중 상승" = "#59A14F", "가중 하락" = "#E15759")) +
-  labs(x = "기대수명(세)", y = NULL,
-       subtitle = "회색 = 국가 비가중 · 색 = 1인 인구가중 (녹↑ / 적↓)") +
+  labs(x = "기대수명(세)", y = NULL) +
   theme(legend.position = "none")
 gp(p, tooltip = "text")
 ```
