@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.11">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="kwangchun lee">
+
+<title>gapminder EDA 대시보드</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="eda_dashboard_files/libs/clipboard/clipboard.min.js"></script>
+<script src="eda_dashboard_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="eda_dashboard_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="eda_dashboard_files/libs/quarto-html/popper.min.js"></script>
+<script src="eda_dashboard_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="eda_dashboard_files/libs/quarto-html/anchor.min.js"></script>
+<link href="eda_dashboard_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="eda_dashboard_files/libs/quarto-html/quarto-syntax-highlighting-5947b73a06bce04bf1d622ae23e1ec5b.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="eda_dashboard_files/libs/quarto-html/quarto-syntax-highlighting-dark-20723c260624149940944109bbec0d15.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="eda_dashboard_files/libs/quarto-html/quarto-syntax-highlighting-5947b73a06bce04bf1d622ae23e1ec5b.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="eda_dashboard_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="eda_dashboard_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="eda_dashboard_files/libs/bootstrap/bootstrap-459a4e776c836dbc5abd322d5b73eae4.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="eda_dashboard_files/libs/bootstrap/bootstrap-dark-459a4e776c836dbc5abd322d5b73eae4.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
+<link href="eda_dashboard_files/libs/bootstrap/bootstrap-459a4e776c836dbc5abd322d5b73eae4.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="eda_dashboard_files/libs/quarto-dashboard/quarto-dashboard.js"></script>
+<script src="eda_dashboard_files/libs/quarto-dashboard/stickythead.js"></script>
+
+
+
+<script src="eda_dashboard_files/libs/quarto-dashboard/web-components.js" type="module"></script>
+<script src="eda_dashboard_files/libs/quarto-dashboard/components.js"></script>
+
+<link href="eda_dashboard_files/libs/htmltools-fill-0.5.9/fill.css" rel="stylesheet">
+<script src="eda_dashboard_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="eda_dashboard_files/libs/plotly-binding-4.11.0/plotly.js"></script>
+<script src="eda_dashboard_files/libs/typedarray-0.1/typedarray.min.js"></script>
+<script src="eda_dashboard_files/libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="eda_dashboard_files/libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet">
+<script src="eda_dashboard_files/libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+<link href="eda_dashboard_files/libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="eda_dashboard_files/libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+<link href="eda_dashboard_files/libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
+<script src="eda_dashboard_files/libs/datatables-binding-0.34.0/datatables.js"></script>
+<link href="eda_dashboard_files/libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="eda_dashboard_files/libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet">
+<script src="eda_dashboard_files/libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+
+
+</head>
+
+<body class="quarto-dashboard dashboard-fill fullcontent quarto-light">
+
+<header id="quarto-dashboard-header">
+<nav class="navbar navbar-expand-md slim" data-bs-theme="dark">
+  <div class="navbar-container container-fluid">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-controls="dashboard-collapse" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>    
+
+
+    <div class="navbar-brand-container">
+
+
+      <div class="navbar-title">
+        <div class="navbar-title-text"><a href="#">gapminder EDA 대시보드</a></div>
+        
+        <div class="navbar-author">kwangchun lee</div>
+      </div>
+    </div>
+<div id="dashboard-collapse" class="navbar-collapse collapse"><ul class="navbar-nav navbar-nav-scroll me-auto" role="tablist"><li class="nav-item" role="presentation"><a id="tab-핵심-지표" class="nav-link active" data-bs-toggle="tab" role="tab" data-bs-target="#핵심-지표" data-scrolling="false" href="#핵심-지표" aria-controls="핵심-지표" aria-selected="true"><span class="nav-link-text">핵심 지표</span></a></li><li class="nav-item" role="presentation"><a id="tab-가중-vs-비가중" class="nav-link" data-bs-toggle="tab" role="tab" data-bs-target="#가중-vs-비가중" data-scrolling="false" href="#가중-vs-비가중" aria-controls="가중-vs-비가중" aria-selected="false"><span class="nav-link-text">가중 vs 비가중</span></a></li><li class="nav-item" role="presentation"><a id="tab-소득-수명" class="nav-link" data-bs-toggle="tab" role="tab" data-bs-target="#소득-수명" data-scrolling="false" href="#소득-수명" aria-controls="소득-수명" aria-selected="false"><span class="nav-link-text">소득 ↔ 수명</span></a></li></ul></div></div>
+</nav>
+</header>
+<div class="page-layout-custom quarto-dashboard-content bslib-gap-spacing html-fill-container bslib-page-fill quarto-dashboard-pages">  
+
+<div class="bslib-grid-item html-fill-item tab-content bslib-grid" data-layout="fill" style="display: grid; grid-template-rows: minmax(3em, 1fr); grid-auto-columns: minmax(0, 1fr);">
+<div id="핵심-지표" class="dashboard-page tab-pane show active html-fill-item html-fill-container" data-orientation="rows" aria-labelledby="tab-핵심-지표">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 22fr) minmax(3em, 80fr); grid-auto-columns: minmax(0, 1fr);">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-columns: minmax(3em, 1fr) minmax(3em, 1fr) minmax(3em, 1fr);
+grid-auto-rows: minmax(0, 1fr);">
+<div class="card valuebox cell html-fill-item html-fill-container bslib-card bslib-value-box bg-success showcase-left-center" data-bslib-card-init="" data-require-bs-caller="card()">
+<div class="card-body html-fill-item html-fill-container">
+<div data-icon="heart-pulse" class="html-fill-item html-fill-container value-box-grid">
+<div class="value-box-showcase html-fill-item html-fill-container">
+
+<i class="bi bi-heart-pulse"></i></div>
+<div class="value-box-area">
+<p class="value-box-title">
+전세계 기대수명 2007 (1인 기준, 인구가중)
+</p>
+<p class="value-box-value">
+68.9세
+</p>
+</div>
+</div>
+</div>
+<script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div><div class="card valuebox cell html-fill-item html-fill-container bslib-card bslib-value-box bg-primary showcase-left-center" data-bslib-card-init="" data-require-bs-caller="card()">
+<div class="card-body html-fill-item html-fill-container">
+<div data-icon="graph-up-arrow" class="html-fill-item html-fill-container value-box-grid">
+<div class="value-box-showcase html-fill-item html-fill-container">
+
+<i class="bi bi-graph-up-arrow"></i></div>
+<div class="value-box-area">
+<p class="value-box-title">
+지난 55년간 기대수명 증가 (1952→2007)
+</p>
+<p class="value-box-value">
++20.0년
+</p>
+</div>
+</div>
+</div>
+<script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div><div class="card valuebox cell html-fill-item html-fill-container bslib-card bslib-value-box bg-danger showcase-left-center" data-bslib-card-init="" data-require-bs-caller="card()">
+<div class="card-body html-fill-item html-fill-container">
+<div data-icon="rulers" class="html-fill-item html-fill-container value-box-grid">
+<div class="value-box-showcase html-fill-item html-fill-container">
+
+<i class="bi bi-rulers"></i></div>
+<div class="value-box-area">
+<p class="value-box-title">
+최장수–최단명 국가 격차 (2007)
+</p>
+<p class="value-box-value">
+43년
+</p>
+</div>
+</div>
+</div>
+<script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+</div>
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-columns: minmax(3em, 60fr) minmax(3em, 40fr);
+grid-auto-rows: minmax(0, 1fr);">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 1fr); grid-auto-columns: minmax(0, 1fr);">
+<div class="card cell html-fill-item html-fill-container bslib-card" data-title="전세계 기대수명 추세 (가중 vs 비가중)" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card-header"><div class="card-title"><span style="display: inline">
+전세계 기대수명 추세 (가중 vs 비가중)
+</span></div></div>
+<div class="card-body html-fill-item html-fill-container">
+<div class="cell-output-display html-fill-item html-fill-container">
+<div class="plotly html-widget html-fill-item html-fill-container" id="htmlwidget-e91c5da91a8278aaa88d" style="width:100%;height:406px;"></div>
+<script type="application/json" data-for="htmlwidget-e91c5da91a8278aaa88d">{"x":{"data":[{"x":[1952,1957,1962,1967,1972,1977,1982,1987,1992,1997,2002,2007],"y":[49.057619718309859,51.507401126760563,53.609249014084504,55.678289577464788,57.647386478873237,59.570157464788736,61.533197183098594,63.212612676056338,64.160338028169008,65.014676056338033,65.694922535211262,67.007422535211262],"text":["year: 1952<br />lifeExp: 49.05762<br />유형: 비가중","year: 1957<br />lifeExp: 51.50740<br />유형: 비가중","year: 1962<br />lifeExp: 53.60925<br />유형: 비가중","year: 1967<br />lifeExp: 55.67829<br />유형: 비가중","year: 1972<br />lifeExp: 57.64739<br />유형: 비가중","year: 1977<br />lifeExp: 59.57016<br />유형: 비가중","year: 1982<br />lifeExp: 61.53320<br />유형: 비가중","year: 1987<br />lifeExp: 63.21261<br />유형: 비가중","year: 1992<br />lifeExp: 64.16034<br />유형: 비가중","year: 1997<br />lifeExp: 65.01468<br />유형: 비가중","year: 2002<br />lifeExp: 65.69492<br />유형: 비가중","year: 2007<br />lifeExp: 67.00742<br />유형: 비가중"],"type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(248,118,109,1)","dash":"solid"},"hoveron":"points","name":"비가중","legendgroup":"비가중","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(248,118,109,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(248,118,109,1)"}},"frame":null},{"x":[1952,1957,1962,1967,1972,1977,1982,1987,1992,1997,2002,2007],"y":[48.944236730843684,52.121885082738451,52.324382082878934,56.984306791268871,59.514782924650419,61.237255947639646,62.88175539179754,64.416350058076944,65.645899695567564,66.849342948175291,67.839041389774934,68.919092519040419],"text":["year: 1952<br />lifeExp: 48.94424<br />유형: 인구가중","year: 1957<br />lifeExp: 52.12189<br />유형: 인구가중","year: 1962<br />lifeExp: 52.32438<br />유형: 인구가중","year: 1967<br />lifeExp: 56.98431<br />유형: 인구가중","year: 1972<br />lifeExp: 59.51478<br />유형: 인구가중","year: 1977<br />lifeExp: 61.23726<br />유형: 인구가중","year: 1982<br />lifeExp: 62.88176<br />유형: 인구가중","year: 1987<br />lifeExp: 64.41635<br />유형: 인구가중","year: 1992<br />lifeExp: 65.64590<br />유형: 인구가중","year: 1997<br />lifeExp: 66.84934<br />유형: 인구가중","year: 2002<br />lifeExp: 67.83904<br />유형: 인구가중","year: 2007<br />lifeExp: 68.91909<br />유형: 인구가중"],"type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(0,191,196,1)","dash":"solid"},"hoveron":"points","name":"인구가중","legendgroup":"인구가중","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(0,191,196,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,191,196,1)"}},"frame":null}],"layout":{"margin":{"t":23.970112079701121,"r":7.9701120797011216,"b":24.707347447073481,"l":40.647571606475722},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[1949.25,2009.75],"tickmode":"array","ticktext":["1950","1960","1970","1980","1990","2000"],"tickvals":[1950,1960,1970,1980,1990,2000],"categoryorder":"array","categoryarray":["1950","1960","1970","1980","1990","2000"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505603,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"y","title":{"text":"","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[47.945493941433845,69.91783530845025],"tickmode":"array","ticktext":["50","55","60","65"],"tickvals":[50,55,60,65],"categoryorder":"array","categoryarray":["50","55","60","65"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"x","title":{"text":"기대수명","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":12.7521793275218},"title":{"text":"유형","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"a8336fd45aa5":{"x":{},"y":{},"colour":{},"type":"scatter"},"a8335e8b3ffe":{"x":{},"y":{},"colour":{}}},"cur_data":"a8336fd45aa5","visdat":{"a8336fd45aa5":["function (y) ","x"],"a8335e8b3ffe":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
+    <template>Expand</template>
+    <span class="bslib-full-screen-enter badge rounded-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" style="height:1em;width:1em;" aria-hidden="true" role="img"><path d="M20 5C20 4.4 19.6 4 19 4H13C12.4 4 12 3.6 12 3C12 2.4 12.4 2 13 2H21C21.6 2 22 2.4 22 3V11C22 11.6 21.6 12 21 12C20.4 12 20 11.6 20 11V5ZM4 19C4 19.6 4.4 20 5 20H11C11.6 20 12 20.4 12 21C12 21.6 11.6 22 11 22H3C2.4 22 2 21.6 2 21V13C2 12.4 2.4 12 3 12C3.6 12 4 12.4 4 13V19Z"></path></svg>
+    </span>
+</bslib-tooltip><script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+</div><div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 1fr) minmax(3em, max-content); grid-auto-columns: minmax(0, 1fr);">
+<div class="card cell html-fill-item html-fill-container bslib-card" data-title="국가 간 격차(CV) — 수렴은 단조롭지 않다" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card-header"><div class="card-title"><span style="display: inline">
+국가 간 격차(CV) — 수렴은 단조롭지 않다
+</span></div></div>
+<div class="card-body html-fill-item html-fill-container">
+<div class="cell-output-display html-fill-item html-fill-container">
+<div class="datatables html-widget html-fill-item html-fill-container" id="htmlwidget-604349b1cdc1945f4cae" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-604349b1cdc1945f4cae">{"x":{"filter":"none","vertical":false,"data":[[1952,1957,1962,1967,1972,1977,1982,1987,1992,1997,2002,2007],[12.22595577765007,12.23128612340409,12.09724500626452,11.71885777898865,11.38195313809374,11.22722939191967,10.7706178327824,10.55628517216877,11.22737952657978,11.55943905823828,12.2798227122797,12.07302050222512],[0.2492162450573802,0.2374665748190768,0.2256559311824396,0.2104744572421589,0.1974409220141321,0.1884707019375594,0.1750375135023989,0.1669965015726565,0.17498940734462,0.1777973799057543,0.1869219452340163,0.18017437539671],[20.706,21.78925,21.766,21.38575,20.74725000000001,19.90699999999999,17.98125,16.93649999999998,16.46075,18.53599999999999,19.93700000000001,19.25300000000001]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>연도<\/th>\n      <th>SD<\/th>\n      <th>CV<\/th>\n      <th>IQR<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"bPaginate":false,"dom":"t","language":{"info":"Showing _TOTAL_ entries"},"pageLength":12,"ordering":false,"columnDefs":[{"targets":2,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 3, 3, \",\", \".\", null);\n  }"},{"targets":1,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 2, 3, \",\", \".\", null);\n  }"},{"targets":3,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 2, 3, \",\", \".\", null);\n  }"},{"className":"dt-right","targets":[0,1,2,3]},{"name":"연도","targets":0},{"name":"SD","targets":1},{"name":"CV","targets":2},{"name":"IQR","targets":3}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[10,12,25,50,100]}},"evals":["options.columnDefs.0.render","options.columnDefs.1.render","options.columnDefs.2.render"],"jsHooks":[]}</script>
+</div>
+</div>
+<bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
+    <template>Expand</template>
+    <span class="bslib-full-screen-enter badge rounded-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" style="height:1em;width:1em;" aria-hidden="true" role="img"><path d="M20 5C20 4.4 19.6 4 19 4H13C12.4 4 12 3.6 12 3C12 2.4 12.4 2 13 2H21C21.6 2 22 2.4 22 3V11C22 11.6 21.6 12 21 12C20.4 12 20 11.6 20 11V5ZM4 19C4 19.6 4.4 20 5 20H11C11.6 20 12 20.4 12 21C12 21.6 11.6 22 11 22H3C2.4 22 2 21.6 2 21V13C2 12.4 2.4 12 3 12C3.6 12 4 12.4 4 13V19Z"></path></svg>
+    </span>
+</bslib-tooltip><script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+<div class="card html-fill-item html-fill-container bslib-card" data-fill="false" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card-body html-fill-item html-fill-container">
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center html-fill-item html-fill-container">
+<div class="callout-icon-container html-fill-item html-fill-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill html-fill-item html-fill-container">
+노트
+</div>
+</div>
+<div class="callout-body-container callout-body html-fill-item html-fill-container">
+<p>CV는 0.249(1952)→0.18(2007)로 전반 수렴이나 1987 최저 후 1987–2002 재확대.</p>
+</div>
+</div>
+</div>
+<bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
+    <template>Expand</template>
+    <span class="bslib-full-screen-enter badge rounded-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" style="height:1em;width:1em;" aria-hidden="true" role="img"><path d="M20 5C20 4.4 19.6 4 19 4H13C12.4 4 12 3.6 12 3C12 2.4 12.4 2 13 2H21C21.6 2 22 2.4 22 3V11C22 11.6 21.6 12 21 12C20.4 12 20 11.6 20 11V5ZM4 19C4 19.6 4.4 20 5 20H11C11.6 20 12 20.4 12 21C12 21.6 11.6 22 11 22H3C2.4 22 2 21.6 2 21V13C2 12.4 2.4 12 3 12C3.6 12 4 12.4 4 13V19Z"></path></svg>
+    </span>
+</bslib-tooltip><script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+</div>
+</div>
+</div>
+</div>
+<div id="가중-vs-비가중" class="dashboard-page tab-pane grid-skip html-fill-item html-fill-container" data-orientation="rows" aria-labelledby="tab-가중-vs-비가중">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 1fr); grid-auto-columns: minmax(0, 1fr);">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-columns: minmax(3em, 55fr) minmax(3em, 45fr);
+grid-auto-rows: minmax(0, 1fr);">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 1fr); grid-auto-columns: minmax(0, 1fr);">
+<div class="card cell html-fill-item html-fill-container bslib-card" data-title="대륙별 기대수명: 비가중 ↔ 인구가중 (2007)" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card-header"><div class="card-title"><span style="display: inline">
+대륙별 기대수명: 비가중 ↔︎ 인구가중 (2007)
+</span></div></div>
+<div class="card-body html-fill-item html-fill-container">
+<div class="cell-output-display html-fill-item html-fill-container">
+<div class="plotly html-widget html-fill-item html-fill-container" id="htmlwidget-49811998b244c85c8b83" style="width:100%;height:406px;"></div>
+<script type="application/json" data-for="htmlwidget-49811998b244c85c8b83">{"x":{"data":[{"x":[80.719499999999996,81.062154009701118,null,77.648600000000002,77.890570810698961,null,73.60812,75.356682227430269,null,70.728484848484854,69.443863042050168,null,54.806038461538463,54.56441057558196],"y":[5,5,null,4,4,null,3,3,null,2,2,null,1,1],"text":["reorder(continent, 인구가중): Oceania<br />비가중: 80.71950<br />인구가중: 81.06215<br />continent: 5","reorder(continent, 인구가중): Oceania<br />비가중: 80.71950<br />인구가중: 81.06215<br />continent: 5",null,"reorder(continent, 인구가중): Europe<br />비가중: 77.64860<br />인구가중: 77.89057<br />continent: 4","reorder(continent, 인구가중): Europe<br />비가중: 77.64860<br />인구가중: 77.89057<br />continent: 4",null,"reorder(continent, 인구가중): Americas<br />비가중: 73.60812<br />인구가중: 75.35668<br />continent: 3","reorder(continent, 인구가중): Americas<br />비가중: 73.60812<br />인구가중: 75.35668<br />continent: 3",null,"reorder(continent, 인구가중): Asia<br />비가중: 70.72848<br />인구가중: 69.44386<br />continent: 2","reorder(continent, 인구가중): Asia<br />비가중: 70.72848<br />인구가중: 69.44386<br />continent: 2",null,"reorder(continent, 인구가중): Africa<br />비가중: 54.80604<br />인구가중: 54.56441<br />continent: 1","reorder(continent, 인구가중): Africa<br />비가중: 54.80604<br />인구가중: 54.56441<br />continent: 1"],"type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(179,179,179,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[80.719499999999996,77.648600000000002,73.60812,70.728484848484854,54.806038461538463],"y":[5,4,3,2,1],"text":["reorder(continent, 인구가중): Oceania<br />비가중: 80.71950<br />colour: 비가중","reorder(continent, 인구가중): Europe<br />비가중: 77.64860<br />colour: 비가중","reorder(continent, 인구가중): Americas<br />비가중: 73.60812<br />colour: 비가중","reorder(continent, 인구가중): Asia<br />비가중: 70.72848<br />colour: 비가중","reorder(continent, 인구가중): Africa<br />비가중: 54.80604<br />colour: 비가중"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(27,158,119,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(27,158,119,1)"}},"hoveron":"points","name":"비가중","legendgroup":"비가중","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[81.062154009701118,77.890570810698961,75.356682227430269,69.443863042050168,54.56441057558196],"y":[5,4,3,2,1],"text":["reorder(continent, 인구가중): Oceania<br />인구가중: 81.06215<br />colour: 인구가중","reorder(continent, 인구가중): Europe<br />인구가중: 77.89057<br />colour: 인구가중","reorder(continent, 인구가중): Americas<br />인구가중: 75.35668<br />colour: 인구가중","reorder(continent, 인구가중): Asia<br />인구가중: 69.44386<br />colour: 인구가중","reorder(continent, 인구가중): Africa<br />인구가중: 54.56441<br />colour: 인구가중"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(217,95,2,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(217,95,2,1)"}},"hoveron":"points","name":"인구가중","legendgroup":"인구가중","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":23.970112079701121,"r":7.9701120797011216,"b":40.647571606475722,"l":62.963885429638879},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[53.239523403875999,82.387041181407071],"tickmode":"array","ticktext":["60","70","80"],"tickvals":[60,70,80],"categoryorder":"array","categoryarray":["60","70","80"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505603,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"y","title":{"text":"기대수명","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,5.5999999999999996],"tickmode":"array","ticktext":["Africa","Asia","Americas","Europe","Oceania"],"tickvals":[1,2,3,4,5],"categoryorder":"array","categoryarray":["Africa","Asia","Americas","Europe","Oceania"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"x","title":{"text":"","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":12.7521793275218},"title":{"text":"","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"a83321848fbd":{"y":{},"x":{},"xend":{},"yend":{},"type":"scatter"},"a8335f8d27c":{"y":{},"x":{},"colour":{}},"a83312c2cdf4":{"y":{},"x":{},"colour":{}}},"cur_data":"a83321848fbd","visdat":{"a83321848fbd":["function (y) ","x"],"a8335f8d27c":["function (y) ","x"],"a83312c2cdf4":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
+    <template>Expand</template>
+    <span class="bslib-full-screen-enter badge rounded-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" style="height:1em;width:1em;" aria-hidden="true" role="img"><path d="M20 5C20 4.4 19.6 4 19 4H13C12.4 4 12 3.6 12 3C12 2.4 12.4 2 13 2H21C21.6 2 22 2.4 22 3V11C22 11.6 21.6 12 21 12C20.4 12 20 11.6 20 11V5ZM4 19C4 19.6 4.4 20 5 20H11C11.6 20 12 20.4 12 21C12 21.6 11.6 22 11 22H3C2.4 22 2 21.6 2 21V13C2 12.4 2.4 12 3 12C3.6 12 4 12.4 4 13V19Z"></path></svg>
+    </span>
+</bslib-tooltip><script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+</div><div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 1fr) minmax(3em, max-content); grid-auto-columns: minmax(0, 1fr);">
+<div class="card cell html-fill-item html-fill-container bslib-card" data-title="대륙별 가중/비가중 비교표 (2007)" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card-header"><div class="card-title"><span style="display: inline">
+대륙별 가중/비가중 비교표 (2007)
+</span></div></div>
+<div class="card-body html-fill-item html-fill-container">
+<div class="cell-output-display html-fill-item html-fill-container">
+<div class="datatables html-widget html-fill-item html-fill-container" id="htmlwidget-518dfdb5005f71076ad9" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-518dfdb5005f71076ad9">{"x":{"filter":"none","vertical":false,"data":[["Oceania","Europe","Americas","Asia","Africa"],[2,30,25,33,52],[80.7195,77.6486,73.60812,70.72848484848485,54.80603846153846],[81.06215400970112,77.89057081069896,75.35668222743027,69.44386304205017,54.56441057558196],[0.3426540097011213,0.2419708106989589,1.74856222743027,-1.284621806434686,-0.241627885956504]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>continent<\/th>\n      <th>n<\/th>\n      <th>비가중<\/th>\n      <th>인구가중<\/th>\n      <th>차이<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"bPaginate":false,"dom":"t","language":{"info":"Showing _TOTAL_ entries"},"pageLength":5,"columnDefs":[{"targets":2,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 2, 3, \",\", \".\", null);\n  }"},{"targets":3,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 2, 3, \",\", \".\", null);\n  }"},{"targets":4,"render":"function(data, type, row, meta) {\n    return type !== 'display' ? data : DTWidget.formatRound(data, 2, 3, \",\", \".\", null);\n  }"},{"className":"dt-right","targets":[1,2,3,4]},{"name":"continent","targets":0},{"name":"n","targets":1},{"name":"비가중","targets":2},{"name":"인구가중","targets":3},{"name":"차이","targets":4}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":["options.columnDefs.0.render","options.columnDefs.1.render","options.columnDefs.2.render"],"jsHooks":[]}</script>
+</div>
+</div>
+<bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
+    <template>Expand</template>
+    <span class="bslib-full-screen-enter badge rounded-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" style="height:1em;width:1em;" aria-hidden="true" role="img"><path d="M20 5C20 4.4 19.6 4 19 4H13C12.4 4 12 3.6 12 3C12 2.4 12.4 2 13 2H21C21.6 2 22 2.4 22 3V11C22 11.6 21.6 12 21 12C20.4 12 20 11.6 20 11V5ZM4 19C4 19.6 4.4 20 5 20H11C11.6 20 12 20.4 12 21C12 21.6 11.6 22 11 22H3C2.4 22 2 21.6 2 21V13C2 12.4 2.4 12 3 12C3.6 12 4 12.4 4 13V19Z"></path></svg>
+    </span>
+</bslib-tooltip><script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+<div class="card html-fill-item html-fill-container bslib-card" data-fill="false" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card-body html-fill-item html-fill-container">
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center html-fill-item html-fill-container">
+<div class="callout-icon-container html-fill-item html-fill-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill html-fill-item html-fill-container">
+경고
+</div>
+</div>
+<div class="callout-body-container callout-body html-fill-item html-fill-container">
+<p>아시아는 인구 큰 국가(인도 등)로 가중 시 <strong>하락</strong>, 아메리카는 미국이 <strong>끌어올림</strong>. 가중·비가중을 구분하지 않으면 헤드라인이 1~2년 어긋난다.</p>
+</div>
+</div>
+</div>
+<bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
+    <template>Expand</template>
+    <span class="bslib-full-screen-enter badge rounded-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" style="height:1em;width:1em;" aria-hidden="true" role="img"><path d="M20 5C20 4.4 19.6 4 19 4H13C12.4 4 12 3.6 12 3C12 2.4 12.4 2 13 2H21C21.6 2 22 2.4 22 3V11C22 11.6 21.6 12 21 12C20.4 12 20 11.6 20 11V5ZM4 19C4 19.6 4.4 20 5 20H11C11.6 20 12 20.4 12 21C12 21.6 11.6 22 11 22H3C2.4 22 2 21.6 2 21V13C2 12.4 2.4 12 3 12C3.6 12 4 12.4 4 13V19Z"></path></svg>
+    </span>
+</bslib-tooltip><script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+</div>
+</div>
+</div>
+</div>
+<div id="소득-수명" class="dashboard-page tab-pane grid-skip html-fill-item html-fill-container" data-orientation="rows" aria-labelledby="tab-소득-수명">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 1fr); grid-auto-columns: minmax(0, 1fr);">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-columns: minmax(3em, 55fr) minmax(3em, 45fr);
+grid-auto-rows: minmax(0, 1fr);">
+<div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 1fr); grid-auto-columns: minmax(0, 1fr);">
+<div class="card cell html-fill-item html-fill-container bslib-card" data-title="GDP per capita vs 기대수명 (2007, 버블=인구)" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card-header"><div class="card-title"><span style="display: inline">
+GDP per capita vs 기대수명 (2007, 버블=인구)
+</span></div></div>
+<div class="card-body html-fill-item html-fill-container">
+<div class="cell-output-display html-fill-item html-fill-container">
+<div class="plotly html-widget html-fill-item html-fill-container" id="htmlwidget-7af1f8290a3ab85d0436" style="width:100%;height:406px;"></div>
+<script type="application/json" data-for="htmlwidget-7af1f8290a3ab85d0436">{"x":{"data":[{"x":[3.7940254450966644,3.6809906556268164,3.1587498285200959,4.0993301562976825,3.0853023521971163,2.6335398473202094,3.3100759930113757,2.8488148736349985,3.2314858313133699,2.9939420450679588,2.443344140046372,3.5602125331291146,3.1888582353745463,3.3185811659560813,3.7467261069384517,4.0847224390037145,2.8071083194109296,2.8393558343569567,4.120787226641542,2.8766506063906259,3.1230701584328973,2.9743524119826992,2.7628523540039867,3.1653183196828425,3.195714676047237,2.6175322269121151,4.0812572446605149,3.0190207459573766,2.8804419458658828,3.0181100381010961,3.2560322165243099,4.0396913096789095,3.5820832842930348,2.9157614843495785,3.6822408118633683,2.7921653017164396,3.3040545722906871,3.884802303432406,2.9360553118387509,3.2036950046605677,3.2336235137236495,2.9357796251727324,2.9666771427490164,3.9670637023386344,3.4153732150271123,3.6545115842375888,3.0443367476975203,2.9459459204926648,3.8508252467512323,3.0238202200422353,3.1042178448294138,2.6718291573166399],"y":[72.301000000000002,42.731000000000002,56.728000000000002,50.728000000000002,52.295000000000002,49.579999999999998,50.43,44.741,50.651000000000003,65.152000000000001,46.462000000000003,55.322000000000003,48.328000000000003,54.790999999999997,71.337999999999994,51.579000000000001,58.039999999999999,52.947000000000003,56.734999999999999,59.448,60.021999999999998,56.006999999999998,46.387999999999998,54.109999999999999,42.591999999999999,45.677999999999997,73.951999999999998,59.442999999999998,48.302999999999997,54.466999999999999,64.164000000000001,72.801000000000002,71.164000000000001,42.082000000000001,52.905999999999999,56.866999999999997,46.859000000000002,76.441999999999993,46.241999999999997,65.528000000000006,63.061999999999998,42.567999999999998,48.158999999999999,49.338999999999999,58.555999999999997,39.613,52.517000000000003,58.420000000000002,73.923000000000002,51.542000000000002,42.384,43.487000000000002],"text":["Algeria<br>lifeExp: 72.3<br>gdp: 6,223","Angola<br>lifeExp: 42.7<br>gdp: 4,797","Benin<br>lifeExp: 56.7<br>gdp: 1,441","Botswana<br>lifeExp: 50.7<br>gdp: 12,570","Burkina Faso<br>lifeExp: 52.3<br>gdp: 1,217","Burundi<br>lifeExp: 49.6<br>gdp: 430","Cameroon<br>lifeExp: 50.4<br>gdp: 2,042","Central African Republic<br>lifeExp: 44.7<br>gdp: 706","Chad<br>lifeExp: 50.7<br>gdp: 1,704","Comoros<br>lifeExp: 65.2<br>gdp: 986","Congo Dem. Rep.<br>lifeExp: 46.5<br>gdp: 278","Congo Rep.<br>lifeExp: 55.3<br>gdp: 3,633","Cote d'Ivoire<br>lifeExp: 48.3<br>gdp: 1,545","Djibouti<br>lifeExp: 54.8<br>gdp: 2,082","Egypt<br>lifeExp: 71.3<br>gdp: 5,581","Equatorial Guinea<br>lifeExp: 51.6<br>gdp: 12,154","Eritrea<br>lifeExp: 58<br>gdp: 641","Ethiopia<br>lifeExp: 52.9<br>gdp: 691","Gabon<br>lifeExp: 56.7<br>gdp: 13,206","Gambia<br>lifeExp: 59.4<br>gdp: 753","Ghana<br>lifeExp: 60<br>gdp: 1,328","Guinea<br>lifeExp: 56<br>gdp: 943","Guinea-Bissau<br>lifeExp: 46.4<br>gdp: 579","Kenya<br>lifeExp: 54.1<br>gdp: 1,463","Lesotho<br>lifeExp: 42.6<br>gdp: 1,569","Liberia<br>lifeExp: 45.7<br>gdp: 415","Libya<br>lifeExp: 74<br>gdp: 12,057","Madagascar<br>lifeExp: 59.4<br>gdp: 1,045","Malawi<br>lifeExp: 48.3<br>gdp: 759","Mali<br>lifeExp: 54.5<br>gdp: 1,043","Mauritania<br>lifeExp: 64.2<br>gdp: 1,803","Mauritius<br>lifeExp: 72.8<br>gdp: 10,957","Morocco<br>lifeExp: 71.2<br>gdp: 3,820","Mozambique<br>lifeExp: 42.1<br>gdp: 824","Namibia<br>lifeExp: 52.9<br>gdp: 4,811","Niger<br>lifeExp: 56.9<br>gdp: 620","Nigeria<br>lifeExp: 46.9<br>gdp: 2,014","Reunion<br>lifeExp: 76.4<br>gdp: 7,670","Rwanda<br>lifeExp: 46.2<br>gdp: 863","Sao Tome and Principe<br>lifeExp: 65.5<br>gdp: 1,598","Senegal<br>lifeExp: 63.1<br>gdp: 1,712","Sierra Leone<br>lifeExp: 42.6<br>gdp: 863","Somalia<br>lifeExp: 48.2<br>gdp: 926","South Africa<br>lifeExp: 49.3<br>gdp: 9,270","Sudan<br>lifeExp: 58.6<br>gdp: 2,602","Swaziland<br>lifeExp: 39.6<br>gdp: 4,513","Tanzania<br>lifeExp: 52.5<br>gdp: 1,107","Togo<br>lifeExp: 58.4<br>gdp: 883","Tunisia<br>lifeExp: 73.9<br>gdp: 7,093","Uganda<br>lifeExp: 51.5<br>gdp: 1,056","Zambia<br>lifeExp: 42.4<br>gdp: 1,271","Zimbabwe<br>lifeExp: 43.5<br>gdp: 470"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(248,118,109,1)","opacity":0.69999999999999996,"size":[14.748841134496104,11.925549964849154,11.065036913365983,9.0576874179716729,12.253676830507874,11.133823526332453,12.783734642747724,10.109531251275785,11.516652124363011,8.4522653803129018,17.583228096082987,9.9293088557513762,12.830868907986218,8.2395262415911041,18.735473897969086,8.2997160375780634,10.26895836932375,18.470410585874038,8.9584913012852265,9.0830961966845845,13.506674569820307,11.458873707560649,8.9680318492048237,14.991779702519779,9.2409106809131547,9.7204475871941156,10.576843060440254,12.998981708857874,12.084616122339375,11.855551542032599,9.7477487323661141,8.8397490798675431,14.794693114230524,13.110266884565695,9.2604769705320642,12.009492087679385,22.062702416233904,8.5253705821198391,11.234971764978198,7.559055118110237,11.898133679517448,10.604541897743383,11.289359025765403,15.825328881445857,15.662844688930507,8.7658558007291631,15.252669634215518,10.48888027047807,11.524007419486056,14.282034764619556,11.803352078266245,11.905973883764771],"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(248,118,109,1)"}},"hoveron":"points","name":"Africa","legendgroup":"Africa","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[4.1065097720176862,3.5823062593168782,3.957406173408569,4.5601366924251883,4.1196398143870931,3.8455061110473117,3.9843049975871763,3.9517309708016475,3.7799840633073747,3.8371629195761865,3.7580298117512663,3.7148366998460376,3.0797733480287044,3.550024106620056,3.8645633037284566,4.0783688975107708,3.4392254438054342,3.991632953509189,3.6204315729333021,3.8697540590018766,4.2862028478952521,4.2554777630339444,4.6329798832790043,4.0257752637018411,4.0575065679833457],"y":[75.319999999999993,65.554000000000002,72.390000000000001,80.653000000000006,78.552999999999997,72.888999999999996,78.781999999999996,78.272999999999996,72.234999999999999,74.994,71.878,70.259,60.915999999999997,70.197999999999993,72.566999999999993,76.194999999999993,72.899000000000001,75.537000000000006,71.751999999999995,71.421000000000006,78.745999999999995,69.819000000000003,78.242000000000004,76.384,73.747],"text":["Argentina<br>lifeExp: 75.3<br>gdp: 12,779","Bolivia<br>lifeExp: 65.6<br>gdp: 3,822","Brazil<br>lifeExp: 72.4<br>gdp: 9,066","Canada<br>lifeExp: 80.7<br>gdp: 36,319","Chile<br>lifeExp: 78.6<br>gdp: 13,172","Colombia<br>lifeExp: 72.9<br>gdp: 7,007","Costa Rica<br>lifeExp: 78.8<br>gdp: 9,645","Cuba<br>lifeExp: 78.3<br>gdp: 8,948","Dominican Republic<br>lifeExp: 72.2<br>gdp: 6,025","Ecuador<br>lifeExp: 75<br>gdp: 6,873","El Salvador<br>lifeExp: 71.9<br>gdp: 5,728","Guatemala<br>lifeExp: 70.3<br>gdp: 5,186","Haiti<br>lifeExp: 60.9<br>gdp: 1,202","Honduras<br>lifeExp: 70.2<br>gdp: 3,548","Jamaica<br>lifeExp: 72.6<br>gdp: 7,321","Mexico<br>lifeExp: 76.2<br>gdp: 11,978","Nicaragua<br>lifeExp: 72.9<br>gdp: 2,749","Panama<br>lifeExp: 75.5<br>gdp: 9,809","Paraguay<br>lifeExp: 71.8<br>gdp: 4,173","Peru<br>lifeExp: 71.4<br>gdp: 7,409","Puerto Rico<br>lifeExp: 78.7<br>gdp: 19,329","Trinidad and Tobago<br>lifeExp: 69.8<br>gdp: 18,009","United States<br>lifeExp: 78.2<br>gdp: 42,952","Uruguay<br>lifeExp: 76.4<br>gdp: 10,611","Venezuela<br>lifeExp: 73.7<br>gdp: 11,416"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(163,165,0,1)","opacity":0.69999999999999996,"size":[15.468869839327034,11.289438280133142,24.767521845272949,14.755014663383426,12.568552219553887,15.846978850336139,10.036565154265926,11.742438512895857,11.331126069191752,12.157900496009667,10.801815586531159,11.952700904723578,11.15824761538317,10.930156890073965,9.5655488234046757,20.569702447409565,10.481890033570703,9.7377851122854455,10.735577442245749,14.224277343660795,9.9755518843057498,8.7153781308978111,29.227195165873262,9.810098533578623,13.913918098259559],"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(163,165,0,1)"}},"hoveron":"points","name":"Americas","legendgroup":"Americas","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[2.9888176454912858,4.4741586701859664,3.1434063610570009,3.2339547372751722,3.6954041667466049,4.5990636726886356,3.3895577312128795,3.5490831898821575,4.0646718823630357,3.6504106831196688,4.406936435530084,4.5004569709846161,3.6550866594992835,3.2022336270366805,4.3682522837381041,4.6749253140699576,4.0195756382230385,4.095227107013149,3.4907690059237622,2.9749719942980688,3.0379679438446519,4.3486201061894318,3.4159656754035375,3.5038561648270914,4.3355548175826542,4.6734188707962172,3.5988009435983197,3.6216485631534296,4.4581583777244909,3.8726454573379581,3.3876703191654678,3.4807755960325997,3.3580814739680283],"y":[43.828000000000003,75.635000000000005,64.061999999999998,59.722999999999999,72.960999999999999,82.207999999999998,64.697999999999993,70.650000000000006,70.963999999999999,59.545000000000002,80.745000000000005,82.602999999999994,72.534999999999997,67.296999999999997,78.623000000000005,77.587999999999994,71.992999999999995,74.241,66.802999999999997,62.069000000000003,63.784999999999997,75.640000000000001,65.483000000000004,71.688000000000002,72.777000000000001,79.971999999999994,72.396000000000001,74.143000000000001,78.400000000000006,70.616,74.248999999999995,73.421999999999997,62.698],"text":["Afghanistan<br>lifeExp: 43.8<br>gdp: 975","Bahrain<br>lifeExp: 75.6<br>gdp: 29,796","Bangladesh<br>lifeExp: 64.1<br>gdp: 1,391","Cambodia<br>lifeExp: 59.7<br>gdp: 1,714","China<br>lifeExp: 73<br>gdp: 4,959","Hong Kong China<br>lifeExp: 82.2<br>gdp: 39,725","India<br>lifeExp: 64.7<br>gdp: 2,452","Indonesia<br>lifeExp: 70.7<br>gdp: 3,541","Iran<br>lifeExp: 71<br>gdp: 11,606","Iraq<br>lifeExp: 59.5<br>gdp: 4,471","Israel<br>lifeExp: 80.7<br>gdp: 25,523","Japan<br>lifeExp: 82.6<br>gdp: 31,656","Jordan<br>lifeExp: 72.5<br>gdp: 4,519","Korea Dem. Rep.<br>lifeExp: 67.3<br>gdp: 1,593","Korea Rep.<br>lifeExp: 78.6<br>gdp: 23,348","Kuwait<br>lifeExp: 77.6<br>gdp: 47,307","Lebanon<br>lifeExp: 72<br>gdp: 10,461","Malaysia<br>lifeExp: 74.2<br>gdp: 12,452","Mongolia<br>lifeExp: 66.8<br>gdp: 3,096","Myanmar<br>lifeExp: 62.1<br>gdp: 944","Nepal<br>lifeExp: 63.8<br>gdp: 1,091","Oman<br>lifeExp: 75.6<br>gdp: 22,316","Pakistan<br>lifeExp: 65.5<br>gdp: 2,606","Philippines<br>lifeExp: 71.7<br>gdp: 3,190","Saudi Arabia<br>lifeExp: 72.8<br>gdp: 21,655","Singapore<br>lifeExp: 80<br>gdp: 47,143","Sri Lanka<br>lifeExp: 72.4<br>gdp: 3,970","Syria<br>lifeExp: 74.1<br>gdp: 4,185","Taiwan<br>lifeExp: 78.4<br>gdp: 28,718","Thailand<br>lifeExp: 70.6<br>gdp: 7,458","Vietnam<br>lifeExp: 74.2<br>gdp: 2,442","West Bank and Gaza<br>lifeExp: 73.4<br>gdp: 3,025","Yemen Rep.<br>lifeExp: 62.7<br>gdp: 2,281"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,191,125,1)","opacity":0.69999999999999996,"size":[14.590505019630639,8.4501782997016228,22.869466436009802,12.221272202179524,52.913385826771659,10.811597275707914,49.177072405115098,26.225941369279884,17.953560133667917,14.085297554028521,10.67596560439714,21.650051073105505,10.581048092949146,13.562597379126252,16.288616137842901,9.4558011239240969,9.9686943916308408,13.756896958235897,9.6017646165167072,16.173222278532176,14.250795546993926,9.7243977490884621,23.800176775744994,19.466267301080155,14.097406458821395,10.165191823086943,13.169891074167948,13.020033655749922,13.546016770196854,17.619068817955249,19.079020882879647,9.9999113191156894,13.419259731048687],"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,191,125,1)"}},"hoveron":"points","name":"Asia","legendgroup":"Asia","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[3.7735692087621691,4.5578258006221848,4.5275345915133105,3.8719404594797928,4.0286034909483179,4.1649242825131747,4.3585688446278343,4.5475091108168488,4.5212307459814749,4.4838726922507623,4.5074561155365247,4.4399388911990529,4.2554882582210949,4.5584780356339154,4.6093381996914395,4.4559059795027833,3.9663246195778949,4.5658234281049346,4.6933504280025318,4.1872364943512697,4.3119582019159575,4.0337644468812863,3.9906289409349966,4.271337680163577,4.4110850532178922,4.4597100052953031,4.5296837260525233,4.574105601810623,3.927281872119107,4.5211807429313629],"y":[76.423000000000002,79.828999999999994,79.441000000000003,74.852000000000004,73.004999999999995,75.748000000000005,76.486000000000004,78.331999999999994,79.313000000000002,80.656999999999996,79.406000000000006,79.483000000000004,73.337999999999994,81.757000000000005,78.885000000000005,80.546000000000006,74.543000000000006,79.762,80.195999999999998,75.563000000000002,78.097999999999999,72.475999999999999,74.001999999999995,74.662999999999997,77.926000000000002,80.941000000000003,80.884,81.700999999999993,71.777000000000001,79.424999999999997],"text":["Albania<br>lifeExp: 76.4<br>gdp: 5,937","Austria<br>lifeExp: 79.8<br>gdp: 36,126","Belgium<br>lifeExp: 79.4<br>gdp: 33,693","Bosnia and Herzegovina<br>lifeExp: 74.9<br>gdp: 7,446","Bulgaria<br>lifeExp: 73<br>gdp: 10,681","Croatia<br>lifeExp: 75.7<br>gdp: 14,619","Czech Republic<br>lifeExp: 76.5<br>gdp: 22,833","Denmark<br>lifeExp: 78.3<br>gdp: 35,278","Finland<br>lifeExp: 79.3<br>gdp: 33,207","France<br>lifeExp: 80.7<br>gdp: 30,470","Germany<br>lifeExp: 79.4<br>gdp: 32,170","Greece<br>lifeExp: 79.5<br>gdp: 27,538","Hungary<br>lifeExp: 73.3<br>gdp: 18,009","Iceland<br>lifeExp: 81.8<br>gdp: 36,181","Ireland<br>lifeExp: 78.9<br>gdp: 40,676","Italy<br>lifeExp: 80.5<br>gdp: 28,570","Montenegro<br>lifeExp: 74.5<br>gdp: 9,254","Netherlands<br>lifeExp: 79.8<br>gdp: 36,798","Norway<br>lifeExp: 80.2<br>gdp: 49,357","Poland<br>lifeExp: 75.6<br>gdp: 15,390","Portugal<br>lifeExp: 78.1<br>gdp: 20,510","Romania<br>lifeExp: 72.5<br>gdp: 10,808","Serbia<br>lifeExp: 74<br>gdp: 9,787","Slovak Republic<br>lifeExp: 74.7<br>gdp: 18,678","Slovenia<br>lifeExp: 77.9<br>gdp: 25,768","Spain<br>lifeExp: 80.9<br>gdp: 28,821","Sweden<br>lifeExp: 80.9<br>gdp: 33,860","Switzerland<br>lifeExp: 81.7<br>gdp: 37,506","Turkey<br>lifeExp: 71.8<br>gdp: 8,458","United Kingdom<br>lifeExp: 79.4<br>gdp: 33,203"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,176,246,1)","opacity":0.69999999999999996,"size":[9.8625176398150316,11.091959966295786,11.546777371263968,10.164949063319195,10.892715758414557,10.147261641678488,11.514668142946354,10.426047850848743,10.362864347944807,17.305230015305202,18.883607946250109,11.607747713161,11.46053237799366,7.9586588879975535,10.028744915330114,17.067318708766663,8.4290617456450185,12.612871574961241,10.187520322581328,15.290961342597432,11.595503405528023,13.427814375028731,11.499161257175894,10.420432482025792,9.2393311153090973,15.483281316673381,11.270977343094923,10.946522870165969,18.080741710342902,17.28057275696624],"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,176,246,1)"}},"hoveron":"points","name":"Europe","legendgroup":"Europe","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[4.5370047214526892,4.4011421122881123],"y":[81.234999999999999,80.203999999999994],"text":["Australia<br>lifeExp: 81.2<br>gdp: 34,435","New Zealand<br>lifeExp: 80.2<br>gdp: 25,185"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(231,107,243,1)","opacity":0.69999999999999996,"size":[13.177662554648975,10.030855517078782],"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(231,107,243,1)"}},"hoveron":"points","name":"Oceania","legendgroup":"Oceania","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[2.443344140046372,2.4718252322989818,2.5003063245515911,2.5287874168042008,2.5572685090568106,2.5857496013094199,2.6142306935620296,2.6427117858146394,2.6711928780672491,2.6996739703198585,2.7281550625724682,2.756636154825078,2.7851172470776873,2.813598339330297,2.8420794315829068,2.8705605238355161,2.8990416160881258,2.9275227083407356,2.9560038005933453,2.9844848928459546,3.0129659850985644,3.0414470773511741,3.0699281696037835,3.0984092618563932,3.126890354109003,3.1553714463616123,3.183852538614222,3.2123336308668318,3.2408147231194411,3.2692958153720508,3.2977769076246606,3.3262579998772699,3.3547390921298796,3.3832201843824894,3.4117012766350991,3.4401823688877085,3.4686634611403182,3.4971445533929275,3.5256256456455377,3.554106737898147,3.5825878301507568,3.6110689224033665,3.6395500146559758,3.6680311069085856,3.6965121991611953,3.7249932914138046,3.7534743836664144,3.7819554759190241,3.8104365681716335,3.8389176604242432,3.867398752676853,3.8958798449294623,3.924360937182072,3.9528420294346818,3.9813231216872911,4.0098042139399013,4.0382853061925106,4.0667663984451199,4.0952474906977301,4.1237285829503394,4.1522096752029487,4.1806907674555589,4.2091718597081682,4.2376529519607775,4.2661340442133877,4.294615136465997,4.3230962287186063,4.3515773209712165,4.3800584132238258,4.4085395054764351,4.4370205977290453,4.4655016899816546,4.493982782234264,4.5224638744868741,4.5509449667394835,4.5794260589920928,4.607907151244703,4.6363882434973132,4.6648693357499216,4.6933504280025318],"y":[50.03307197297287,50.462595678089947,50.892119383207017,51.321643088324095,51.751166793441172,52.180690498558242,52.610214203675319,53.039737908792397,53.469261613909474,53.898785319026551,54.328309024143628,54.757832729260706,55.187356434377776,55.616880139494853,56.04640384461193,56.475927549729001,56.905451254846078,57.334974959963155,57.764498665080239,58.19402237019731,58.623546075314387,59.053069780431464,59.482593485548534,59.912117190665612,60.341640895782689,60.771164600899759,61.200688306016836,61.630212011133921,62.059735716250991,62.489259421368068,62.918783126485145,63.348306831602216,63.777830536719293,64.20735424183637,64.636877946953447,65.06640165207051,65.495925357187602,65.925449062304665,66.354972767421756,66.784496472538819,67.214020177655897,67.643543882772974,68.073067587890051,68.502591293007129,68.932114998124206,69.361638703241283,69.79116240835836,70.220686113475438,70.650209818592515,71.079733523709592,71.509257228826669,71.938780933943733,72.36830463906081,72.797828344177887,73.227352049294964,73.656875754412056,74.086399459529119,74.515923164646182,74.945446869763273,75.374970574880336,75.804494279997414,76.234017985114491,76.663541690231568,77.093065395348646,77.522589100465723,77.9521128055828,78.381636510699863,78.811160215816955,79.240683920934032,79.670207626051095,80.099731331168186,80.52925503628525,80.958778741402327,81.388302446519404,81.817826151636481,82.247349856753544,82.676873561870636,83.106397266987713,83.535920972104776,83.965444677221868],"text":"","type":"scatter","mode":"lines","name":"fitted values","line":{"width":2.2677165354330708,"color":"rgba(77,77,77,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":23.970112079701121,"r":7.9701120797011216,"b":40.647571606475722,"l":40.647571606475722},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[2.330843825648564,4.8058507424003398],"tickmode":"array","ticktext":["300","1,000","3,000","10,000","30,000"],"tickvals":[2.4771212547196626,3,3.4771212547196626,4,4.4771212547196626],"categoryorder":"array","categoryarray":["300","1,000","3,000","10,000","30,000"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505603,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"y","title":{"text":"gdpPercap (log10)","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[37.395377766138907,86.18306691108296],"tickmode":"array","ticktext":["40","50","60","70","80"],"tickvals":[40,50,60,70,80],"categoryorder":"array","categoryarray":["40","50","60","70","80"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"x","title":{"text":"기대수명","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":12.7521793275218},"title":{"text":"continent","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"a83336866073":{"x":{},"y":{},"colour":{},"text":{},"size":{},"type":"scatter"},"a833302639fc":{"x":{},"y":{},"weight":{}}},"cur_data":"a83336866073","visdat":{"a83336866073":["function (y) ","x"],"a833302639fc":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
+    <template>Expand</template>
+    <span class="bslib-full-screen-enter badge rounded-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" style="height:1em;width:1em;" aria-hidden="true" role="img"><path d="M20 5C20 4.4 19.6 4 19 4H13C12.4 4 12 3.6 12 3C12 2.4 12.4 2 13 2H21C21.6 2 22 2.4 22 3V11C22 11.6 21.6 12 21 12C20.4 12 20 11.6 20 11V5ZM4 19C4 19.6 4.4 20 5 20H11C11.6 20 12 20.4 12 21C12 21.6 11.6 22 11 22H3C2.4 22 2 21.6 2 21V13C2 12.4 2.4 12 3 12C3.6 12 4 12.4 4 13V19Z"></path></svg>
+    </span>
+</bslib-tooltip><script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+</div><div class="html-fill-item html-fill-container bslib-grid" style="display: grid; grid-template-rows: minmax(3em, 1fr) minmax(3em, max-content); grid-auto-columns: minmax(0, 1fr);">
+<div class="card cell html-fill-item html-fill-container bslib-card" data-title="연도별 단면 상관 r (lifeExp ~ log10 gdp)" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card-header"><div class="card-title"><span style="display: inline">
+연도별 단면 상관 r (lifeExp ~ log10 gdp)
+</span></div></div>
+<div class="card-body html-fill-item html-fill-container">
+<div class="cell-output-display html-fill-item html-fill-container">
+<div class="plotly html-widget html-fill-item html-fill-container" id="htmlwidget-a277a433a1f29c41f507" style="width:100%;height:406px;"></div>
+<script type="application/json" data-for="htmlwidget-a277a433a1f29c41f507">{"x":{"data":[{"x":[1952,1957,1962,1967,1972,1977,1982,1987,1992,1997,2002,2007],"y":[0.74778073479086793,0.75879570601641566,0.77052254431038614,0.7729986641186487,0.78940572750193516,0.81352588081584443,0.84607342627908522,0.87439406827961241,0.85581494630917665,0.86402055044360304,0.8251326766424234,0.80898025148492114],"text":["year: 1952<br />r: 0.7477807","year: 1957<br />r: 0.7587957","year: 1962<br />r: 0.7705225","year: 1967<br />r: 0.7729987","year: 1972<br />r: 0.7894057","year: 1977<br />r: 0.8135259","year: 1982<br />r: 0.8460734","year: 1987<br />r: 0.8743941","year: 1992<br />r: 0.8558149","year: 1997<br />r: 0.8640206","year: 2002<br />r: 0.8251327","year: 2007<br />r: 0.8089803"],"type":"scatter","mode":"lines+markers","line":{"width":3.7795275590551185,"color":"rgba(152,78,163,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","marker":{"autocolorscale":false,"color":"rgba(0,0,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,0,0,1)"}},"frame":null}],"layout":{"margin":{"t":23.970112079701121,"r":7.9701120797011216,"b":24.707347447073481,"l":47.023661270236623},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[1949.25,2009.75],"tickmode":"array","ticktext":["1950","1960","1970","1980","1990","2000"],"tickvals":[1950,1960,1970,1980,1990,2000],"categoryorder":"array","categoryarray":["1950","1960","1970","1980","1990","2000"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505603,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"y","title":{"text":"","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[0.57999999999999996,1.02],"tickmode":"array","ticktext":["0.6","0.7","0.8","0.9","1.0"],"tickvals":[0.60000000000000009,0.70000000000000007,0.80000000000000004,0.90000000000000013,1],"categoryorder":"array","categoryarray":["0.6","0.7","0.8","0.9","1.0"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.9850560398505608,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":12.7521793275218},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"x","title":{"text":"Pearson r","font":{"color":"rgba(0,0,0,1)","family":"","size":15.940224159402241}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":12.7521793275218}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"a83321b0d5a6":{"x":{},"y":{},"type":"scatter"},"a833609a9691":{"x":{},"y":{}}},"cur_data":"a83321b0d5a6","visdat":{"a83321b0d5a6":["function (y) ","x"],"a833609a9691":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
+    <template>Expand</template>
+    <span class="bslib-full-screen-enter badge rounded-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" style="height:1em;width:1em;" aria-hidden="true" role="img"><path d="M20 5C20 4.4 19.6 4 19 4H13C12.4 4 12 3.6 12 3C12 2.4 12.4 2 13 2H21C21.6 2 22 2.4 22 3V11C22 11.6 21.6 12 21 12C20.4 12 20 11.6 20 11V5ZM4 19C4 19.6 4.4 20 5 20H11C11.6 20 12 20.4 12 21C12 21.6 11.6 22 11 22H3C2.4 22 2 21.6 2 21V13C2 12.4 2.4 12 3 12C3.6 12 4 12.4 4 13V19Z"></path></svg>
+    </span>
+</bslib-tooltip><script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+<div class="card html-fill-item html-fill-container bslib-card" data-fill="false" data-bslib-card-init="" data-require-bs-caller="card()" data-full-screen="false">
+<div class="card-body html-fill-item html-fill-container">
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center html-fill-item html-fill-container">
+<div class="callout-icon-container html-fill-item html-fill-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill html-fill-item html-fill-container">
+노트
+</div>
+</div>
+<div class="callout-body-container callout-body html-fill-item html-fill-container">
+<p>풀링 r=0.808는 시간추세가 섞여 단면 해석에 부적절. 연도별 r=0.748~0.874, 2007 회귀 R²=0.654.</p>
+</div>
+</div>
+</div>
+<bslib-tooltip placement="auto" bsoptions="[]" data-require-bs-version="5" data-require-bs-caller="tooltip()">
+    <template>Expand</template>
+    <span class="bslib-full-screen-enter badge rounded-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" style="height:1em;width:1em;" aria-hidden="true" role="img"><path d="M20 5C20 4.4 19.6 4 19 4H13C12.4 4 12 3.6 12 3C12 2.4 12.4 2 13 2H21C21.6 2 22 2.4 22 3V11C22 11.6 21.6 12 21 12C20.4 12 20 11.6 20 11V5ZM4 19C4 19.6 4.4 20 5 20H11C11.6 20 12 20.4 12 21C12 21.6 11.6 22 11 22H3C2.4 22 2 21.6 2 21V13C2 12.4 2.4 12 3 12C3.6 12 4 12.4 4 13V19Z"></path></svg>
+    </span>
+</bslib-tooltip><script data-bslib-card-init="">bslib.Card.initializeAllCards();</script></div>
+<div id="3ade8a4a-fb1d-4a6c-8409-ac45482d5fc9" class="hidden html-fill-item html-fill-container">
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "복사완료!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "복사완료!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /container fluid -->
+
+<script type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (_event) {
+  if (window.bslib.Card) {
+    window.bslib.Card.initializeAllCards();
+  }
+}); 
+</script>
+  
+
+
+
+</body></html>

@@ -1,0 +1,183 @@
+---
+title: "gapminder EDA 대시보드"
+author: "kwangchun lee"
+date: "2026-06-27"
+format:
+  dashboard:
+    theme: cosmo
+    nav-buttons: [github]
+    orientation: rows
+lang: ko
+execute:
+  warning: false
+  message: false
+  echo: false
+---
+
+```{r setup}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+library(plotly)
+library(DT)
+
+# .Rprofile 등의 stats::filter / lubridate 마스킹 방지
+filter <- dplyr::filter; summarise <- dplyr::summarise
+mutate <- dplyr::mutate; select <- dplyr::select; arrange <- dplyr::arrange
+
+theme_set(theme_minimal(base_size = 12))
+
+data_path <- if (file.exists("../data/gapminder.csv")) "../data/gapminder.csv" else "data/gapminder.csv"
+gap <- read.csv(data_path, stringsAsFactors = FALSE)
+yr_lo <- min(gap$year); yr_hi <- max(gap$year)
+
+# --- 사전 집계 (여러 카드에서 재사용) ---
+cmp <- gap %>% filter(year == yr_hi) %>% group_by(continent) %>%
+  summarise(n = n(), 비가중 = mean(lifeExp),
+            인구가중 = weighted.mean(lifeExp, pop), .groups = "drop") %>%
+  mutate(차이 = 인구가중 - 비가중) %>% arrange(desc(인구가중))
+
+glb <- gap %>% filter(year == yr_hi) %>%
+  summarise(unw = mean(lifeExp), wt = weighted.mean(lifeExp, pop))
+
+gtrend <- gap %>% group_by(year) %>%
+  summarise(`비가중` = mean(lifeExp),
+            `인구가중` = weighted.mean(lifeExp, pop), .groups = "drop")
+
+conv <- gap %>% group_by(year) %>%
+  summarise(sd = sd(lifeExp), cv = sd(lifeExp)/mean(lifeExp),
+            iqr = IQR(lifeExp), .groups = "drop")
+
+r_pool <- cor(gap$lifeExp, log10(gap$gdpPercap))
+peryear <- gap %>% group_by(year) %>%
+  summarise(r = cor(lifeExp, log10(gdpPercap)), .groups = "drop")
+fit_r2 <- summary(lm(lifeExp ~ log10(gdpPercap), data = filter(gap, year == yr_hi)))$r.squared
+
+# --- 기대수명 중심 핵심 수치 ---
+life_wt_lo <- gtrend$인구가중[gtrend$year == yr_lo]   # 1952 인구가중 기대수명
+life_wt_hi <- gtrend$인구가중[gtrend$year == yr_hi]   # 2007 인구가중 기대수명
+life_gain  <- life_wt_hi - life_wt_lo                  # 55년간 증가폭
+d_hi   <- filter(gap, year == yr_hi)
+top_country <- d_hi$country[which.max(d_hi$lifeExp)]   # 최고 기대수명 국가
+bot_country <- d_hi$country[which.min(d_hi$lifeExp)]   # 최저 기대수명 국가
+life_gap <- max(d_hi$lifeExp) - min(d_hi$lifeExp)      # 최고-최저 격차
+```
+
+# 핵심 지표 {orientation="rows"}
+
+## Row {height="22%"}
+
+```{r}
+#| content: valuebox
+#| title: "전세계 기대수명 2007 (1인 기준, 인구가중)"
+list(icon = "heart-pulse", color = "success",
+     value = sprintf("%.1f세", life_wt_hi))
+```
+
+```{r}
+#| content: valuebox
+#| title: "지난 55년간 기대수명 증가 (1952→2007)"
+list(icon = "graph-up-arrow", color = "primary",
+     value = sprintf("+%.1f년", life_gain))
+```
+
+```{r}
+#| content: valuebox
+#| title: "최장수–최단명 국가 격차 (2007)"
+list(icon = "rulers", color = "danger",
+     value = sprintf("%.0f년", life_gap))
+```
+
+## Row {height="80%"}
+
+### Column {width="60%"}
+
+```{r}
+#| title: "전세계 기대수명 추세 (가중 vs 비가중)"
+p <- gtrend %>% pivot_longer(-year, names_to = "유형", values_to = "lifeExp") %>%
+  ggplot(aes(year, lifeExp, color = 유형)) +
+  geom_line(linewidth = 1) + geom_point() +
+  labs(x = NULL, y = "기대수명") + theme(legend.position = "top")
+ggplotly(p)
+```
+
+### Column {width="40%"}
+
+```{r}
+#| title: "국가 간 격차(CV) — 수렴은 단조롭지 않다"
+conv %>%
+  transmute(연도 = year, SD = sd, CV = cv, IQR = iqr) %>%
+  datatable(rownames = FALSE,
+            options = list(dom = "t", pageLength = nrow(conv), ordering = FALSE)) %>%
+  formatRound(c("SD", "IQR"), 2) %>%
+  formatRound("CV", 3)
+```
+
+::: {.callout-note}
+CV는 `r round(conv$cv[1],3)`(`r yr_lo`)→`r round(conv$cv[nrow(conv)],3)`(`r yr_hi`)로 전반 수렴이나 1987 최저 후 1987–2002 재확대.
+:::
+
+# 가중 vs 비가중
+
+## Row
+
+### Column {width="55%"}
+
+```{r}
+#| title: "대륙별 기대수명: 비가중 ↔ 인구가중 (2007)"
+p <- ggplot(cmp, aes(y = reorder(continent, 인구가중))) +
+  geom_segment(aes(x = 비가중, xend = 인구가중, yend = continent), color = "grey70") +
+  geom_point(aes(x = 비가중, color = "비가중"), size = 3) +
+  geom_point(aes(x = 인구가중, color = "인구가중"), size = 3) +
+  scale_color_manual(values = c("비가중" = "#1b9e77", "인구가중" = "#d95f02"), name = NULL) +
+  labs(x = "기대수명", y = NULL) + theme(legend.position = "top")
+ggplotly(p)
+```
+
+### Column {width="45%"}
+
+```{r}
+#| title: "대륙별 가중/비가중 비교표 (2007)"
+datatable(cmp, rownames = FALSE, options = list(dom = "t", pageLength = 5)) %>%
+  formatRound(c("비가중", "인구가중", "차이"), 2)
+```
+
+::: {.callout-warning}
+아시아는 인구 큰 국가(인도 등)로 가중 시 **하락**, 아메리카는 미국이 **끌어올림**. 가중·비가중을 구분하지 않으면 헤드라인이 1~2년 어긋난다.
+:::
+
+# 소득 ↔ 수명
+
+## Row
+
+### Column {width="55%"}
+
+```{r}
+#| title: "GDP per capita vs 기대수명 (2007, 버블=인구)"
+d <- filter(gap, year == yr_hi)
+p <- ggplot(d, aes(gdpPercap, lifeExp, color = continent,
+                   text = paste0(country, "<br>lifeExp: ", round(lifeExp,1),
+                                 "<br>gdp: ", comma(round(gdpPercap))))) +
+  geom_point(aes(size = pop), alpha = 0.7) +
+  geom_smooth(data = d, mapping = aes(gdpPercap, lifeExp, weight = pop),
+              method = "lm", se = FALSE, color = "grey30",
+              linewidth = 0.6, inherit.aes = FALSE) +
+  scale_x_log10(labels = comma) + scale_size(range = c(2, 14), guide = "none") +
+  labs(x = "gdpPercap (log10)", y = "기대수명")
+ggplotly(p, tooltip = "text")
+```
+
+### Column {width="45%"}
+
+```{r}
+#| title: "연도별 단면 상관 r (lifeExp ~ log10 gdp)"
+p <- ggplot(peryear, aes(year, r)) +
+  geom_line(linewidth = 1, color = "#984ea3") + geom_point() +
+  ylim(0.6, 1) + labs(x = NULL, y = "Pearson r")
+ggplotly(p)
+```
+
+::: {.callout-note}
+풀링 r=`r round(r_pool,3)`는 시간추세가 섞여 단면 해석에 부적절. 연도별 r=`r round(min(peryear$r),3)`~`r round(max(peryear$r),3)`, 2007 회귀 R²=`r round(fit_r2,3)`.
+:::
