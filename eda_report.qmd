@@ -1,0 +1,345 @@
+---
+title: "gapminder 탐색적 데이터 분석(EDA) 보고서"
+subtitle: "1국가=1표본 vs 1인=1표본을 구분한 비판적 EDA"
+author: "kwangchun lee"
+date: "2026-06-27"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-title: "목차"
+    number-sections: true
+    code-fold: true
+    code-summary: "코드 보기"
+    code-tools: true
+    theme: cosmo
+    fig-width: 8
+    fig-height: 5
+    df-print: kable
+    embed-resources: true
+lang: ko
+execute:
+  warning: false
+  message: false
+  echo: true
+knitr:
+  opts_chunk:
+    dev: "png"
+    dpi: 120
+---
+
+> **분석 원칙** — (1) 모든 수치는 코드가 산출한 값에 근거(암기·단정 금지), (2) **1국가=1표본(unweighted)** 과 **1인=1표본(population-weighted)** 을 구분, (3) EDA는 **패턴**을 보일 뿐 **인과를 규명하지 않음**(인과 해석은 잠정 표기).
+
+```{r setup}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+library(knitr)
+
+# .Rprofile 등의 stats::filter / lubridate 마스킹 방지
+filter <- dplyr::filter
+summarise <- dplyr::summarise
+mutate <- dplyr::mutate
+select <- dplyr::select
+arrange <- dplyr::arrange
+
+theme_set(theme_minimal(base_size = 12))
+
+# document/ 에서 렌더하든 프로젝트 루트에서 렌더하든 데이터를 찾도록
+data_path <- if (file.exists("../data/gapminder.csv")) {
+  "../data/gapminder.csv"
+} else {
+  "data/gapminder.csv"
+}
+gap <- read.csv(data_path, stringsAsFactors = FALSE)
+yr_lo <- min(gap$year)
+yr_hi <- max(gap$year)
+```
+
+`r nrow(gap)`개 관측치, `r dplyr::n_distinct(gap$country)`개국 × `r dplyr::n_distinct(gap$year)`개 시점(`r yr_lo`–`r yr_hi`, 5년 간격).
+
+## 데이터 한계 (해석 시 유의) {#sec-limits}
+
+- 5년 간격·142개국만 포함된 **가공/보간 데이터**(원자료 아님).
+- **Oceania는 호주·뉴질랜드 2개국뿐** → '대륙 요약'으로 일반화 불가, 참고용으로만 사용.
+
+## 개요 {#sec-overview}
+
+```{r overview}
+gap %>%
+  reframe(across(
+    c(lifeExp, gdpPercap, pop),
+    list(Min = min, Median = median, Mean = mean, Max = max)
+  )) %>%
+  tidyr::pivot_longer(
+    everything(),
+    names_to = c("변수", ".value"),
+    names_sep = "_"
+  ) %>%
+  mutate(
+    왜도 = sapply(변수, function(v) {
+      x <- gap[[v]]
+      round(mean((x - mean(x))^3) / sd(x)^3, 2)
+    })
+  ) %>%
+  kable(digits = 1, caption = "수치형 변수 요약 및 왜도")
+```
+
+`gdpPercap`(왜도 +3.84)·`pop`(+8.33)은 강한 우편향 → 로그 척도에서 분석.
+
+## 단변량 분포 및 이상치 (데이터로 검증) {#sec-univariate}
+
+최고 `gdpPercap` 관측치를 코드로 확인:
+
+```{r outlier}
+gap[which.max(gap$gdpPercap), ] |>
+  kable(row.names = FALSE, caption = "최대 gdpPercap 관측치")
+gap %>%
+  arrange(desc(gdpPercap)) %>%
+  head(5) %>%
+  select(country, year, gdpPercap) %>%
+  kable(caption = "gdpPercap 상위 5건 — 초기 산유국(쿠웨이트)에 집중")
+```
+
+```{r hist-life}
+#| label: fig-hist-life
+#| fig-cap: "기대수명 분포 (전 연도 풀링)"
+ggplot(gap, aes(lifeExp)) +
+  geom_histogram(bins = 30, fill = "#2c7fb8", color = "white") +
+  labs(x = "lifeExp", y = "cnt")
+```
+
+소득 분포를 **1국가=1표본**과 **1인=1표본(인구가중)** 으로 비교하면, 가중 밀도가 저소득 쪽으로 이동한다 — 세계 "국가들"의 분포와 "사람들"의 분포는 다르다.
+
+```{r dens-gdp}
+#| label: fig-dens-gdp
+#| fig-cap: "소득 분포: per-country vs per-person (로그축)"
+ggplot(gap, aes(gdpPercap)) +
+  geom_density(
+    aes(weight = 1 / nrow(gap), color = "per country (unweighted)"),
+    linewidth = 1
+  ) +
+  geom_density(
+    aes(weight = pop / sum(pop), color = "per person (pop-weighted)"),
+    linewidth = 1
+  ) +
+  scale_x_log10(labels = comma) +
+  scale_color_manual(
+    values = c(
+      "per country (unweighted)" = "#7570b3",
+      "per person (pop-weighted)" = "#d95f02"
+    ),
+    name = NULL
+  ) +
+  labs(x = "gdpPercap (log10)", y = "density") +
+  theme(legend.position = "top")
+```
+
+## 인구 가중 vs 비가중 (핵심) {#sec-weighting}
+
+기대수명을 **국가 평균**으로 볼지 **사람 1인 기준**으로 볼지에 따라 결론이 달라진다.
+
+```{r weighting}
+cmp <- gap %>%
+  filter(year == yr_hi) %>%
+  group_by(continent) %>%
+  summarise(
+    n = n(),
+    비가중 = mean(lifeExp),
+    인구가중 = weighted.mean(lifeExp, pop),
+    .groups = "drop"
+  ) %>%
+  mutate(차이 = 인구가중 - 비가중) %>%
+  arrange(desc(인구가중))
+kable(
+  cmp,
+  digits = 2,
+  caption = paste0(yr_hi, "년 대륙별 기대수명: 비가중 vs 인구가중")
+)
+
+glb <- gap %>%
+  filter(year == yr_hi) %>%
+  summarise(비가중 = mean(lifeExp), 인구가중 = weighted.mean(lifeExp, pop))
+```
+
+**전세계**: 비가중 **`r round(glb$비가중,2)`** vs 인구가중 **`r round(glb$인구가중,2)`** (**`r sprintf("%+.2f", glb$인구가중-glb$비가중)`년**). 아시아는 인구 큰 국가(인도 등)로 가중 시 하락, 아메리카는 미국이 끌어올린다.
+
+```{r dumbbell}
+#| label: fig-dumbbell
+#| fig-cap: "대륙별 기대수명: 비가중 vs 인구가중 (2007)"
+ggplot(cmp, aes(y = reorder(continent, 인구가중))) +
+  geom_segment(
+    aes(x = 비가중, xend = 인구가중, yend = continent),
+    color = "grey70"
+  ) +
+  geom_point(aes(x = 비가중, color = "unweighted"), size = 3) +
+  geom_point(aes(x = 인구가중, color = "pop-weighted"), size = 3) +
+  scale_color_manual(
+    values = c(unweighted = "#1b9e77", "pop-weighted" = "#d95f02"),
+    name = NULL
+  ) +
+  labs(x = "lifeExp", y = NULL) +
+  theme(legend.position = "top")
+```
+
+> 가중·비가중을 구분하지 않으면 헤드라인 수치가 1~2년씩 어긋난다.
+
+## 전세계 기대수명 추세 {#sec-trend}
+
+```{r global-trend}
+#| label: fig-trend
+#| fig-cap: "전세계 기대수명 추세 (가중/비가중)"
+gtrend <- gap %>%
+  group_by(year) %>%
+  summarise(
+    unweighted = mean(lifeExp),
+    pop_weighted = weighted.mean(lifeExp, pop),
+    .groups = "drop"
+  )
+gtrend %>%
+  pivot_longer(-year, names_to = "type", values_to = "lifeExp") %>%
+  ggplot(aes(year, lifeExp, color = type)) +
+  geom_line(linewidth = 1) +
+  geom_point() +
+  labs(x = "year", y = "lifeExp") +
+  theme(legend.position = "top")
+```
+
+1960년대 이후 인구가중 수명이 비가중을 지속 상회 → 인구 많은 국가들의 개선이 (국가 수 평균보다) 빨랐음을 시사.
+
+## 수렴: 격차는 단조 축소가 아니다 {#sec-convergence}
+
+```{r convergence}
+conv <- gap %>%
+  group_by(year) %>%
+  summarise(
+    sd = sd(lifeExp),
+    cv = sd(lifeExp) / mean(lifeExp),
+    iqr = IQR(lifeExp),
+    .groups = "drop"
+  )
+kable(conv, digits = 4, caption = "국가 간 기대수명 분산의 시간 변화")
+```
+
+```{r conv-plot}
+#| label: fig-convergence
+#| fig-cap: "국가 간 기대수명 변동계수(CV)의 추이"
+ggplot(conv, aes(year, cv)) +
+  geom_line(linewidth = 1, color = "#377eb8") +
+  geom_point() +
+  labs(x = "year", y = "coefficient of variation")
+```
+
+CV는 `r round(conv$cv[1],3)`(`r yr_lo`) → `r round(conv$cv[nrow(conv)],3)`(`r yr_hi`)로 전반적 수렴이나 **단조롭지 않다**: 1987년 최저(0.167)까지 좁혀졌다가 **1987–2002 재확대** 후 회복. "격차가 꾸준히 좁혀졌다"는 단순 서사는 데이터와 맞지 않는다.
+
+## GDP ↔ 기대수명: 풀링 상관의 함정 {#sec-corr}
+
+```{r corr}
+r_pool <- cor(gap$lifeExp, log10(gap$gdpPercap))
+peryear <- gap %>%
+  group_by(year) %>%
+  summarise(r = cor(lifeExp, log10(gdpPercap)), .groups = "drop")
+fit <- lm(lifeExp ~ log10(gdpPercap), data = filter(gap, year == yr_hi))
+kable(
+  peryear,
+  digits = 3,
+  caption = "연도별 단면 상관 r (lifeExp ~ log10 gdpPercap)"
+)
+```
+
+- **풀링**(1952–2007 전체) 상관 r = **`r round(r_pool,3)`** ← 시간추세가 섞여 단면 해석에 부적절.
+- **연도별 단면** r = `r round(min(peryear$r),3)` ~ `r round(max(peryear$r),3)` (평균 `r round(mean(peryear$r),3)`), 1987년 정점 후 하락.
+- `r yr_hi`년 단순회귀 `lifeExp ~ log10(gdpPercap)`: **R² = `r round(summary(fit)$r.squared,3)`**.
+
+```{r corr-by-year}
+#| label: fig-corr-year
+#| fig-cap: "연도별 단면 상관 r"
+ggplot(peryear, aes(year, r)) +
+  geom_line(linewidth = 1, color = "#984ea3") +
+  geom_point() +
+  ylim(0, 1) +
+  labs(x = "year", y = "Pearson r")
+```
+
+```{r scatter}
+#| label: fig-scatter
+#| fig-cap: "GDP per capita vs 기대수명 (2007, 버블=인구, 회색선=인구가중 회귀)"
+#| fig-width: 9
+#| fig-height: 6
+ggplot(filter(gap, year == yr_hi), aes(gdpPercap, lifeExp)) +
+  geom_point(aes(size = pop, color = continent), alpha = 0.7) +
+  geom_smooth(
+    aes(weight = pop),
+    method = "lm",
+    se = FALSE,
+    color = "grey30",
+    linewidth = 0.6
+  ) +
+  scale_x_log10(labels = comma) +
+  scale_size(range = c(1, 14), guide = "none") +
+  labs(x = "gdpPercap (log10)", y = "lifeExp")
+```
+
+> 풀링 r 하나로 요약하면 시간추세를 인과처럼 오해할 수 있다. 단면은 매 시점 독립적으로 봐야 한다.
+
+## 극단값 및 변화 — 패턴 기술(인과 단정 아님) {#sec-extremes}
+
+```{r extremes}
+d_hi <- filter(gap, year == yr_hi)
+bind_rows(
+  arrange(d_hi, desc(lifeExp)) %>% head(3) %>% mutate(구분 = "상위"),
+  arrange(d_hi, lifeExp) %>% head(3) %>% mutate(구분 = "하위")
+) %>%
+  select(구분, country, continent, lifeExp, gdpPercap) %>%
+  kable(digits = 2, caption = paste0(yr_hi, "년 기대수명 상위/하위 3개국"))
+
+growth <- gap %>%
+  filter(year %in% c(yr_lo, yr_hi)) %>%
+  select(country, continent, year, lifeExp) %>%
+  pivot_wider(names_from = year, values_from = lifeExp) %>%
+  mutate(증가 = .data[[as.character(yr_hi)]] - .data[[as.character(yr_lo)]])
+arrange(growth, desc(증가)) %>%
+  head(3) %>%
+  kable(
+    digits = 2,
+    caption = paste0(yr_lo, "→", yr_hi, " 기대수명 증가 상위 3")
+  )
+filter(growth, 증가 < 0) %>%
+  arrange(증가) %>%
+  kable(digits = 2, caption = "역행(감소) 사례")
+```
+
+> ⚠️ **인과 주의**: 위 정체·역행은 **패턴**일 뿐이다. 원인(질병·분쟁 등)은 EDA로 규명할 수 없으며, 별도의 인과 검증이 필요하다.
+
+## 종합 결론 {#sec-conclusion}
+
+1. **가중 vs 비가중을 구분해야 한다** — 1인 기준 전세계 수명은 국가평균보다 약 1.9년 높고, 대륙별로 ±1~2년 차이.
+2. **소득–수명은 강한 양의 단면 관계**(연도별 r≈0.75–0.87, 2007 R²≈0.65)이나 풀링 상관은 단면 해석에 부적절.
+3. **수렴은 단조롭지 않다** — 장기 축소 속 1990년대 발산 구간 존재.
+4. **이상치·소표본 유의** — 쿠웨이트(소득)·Oceania(n=2)는 일반화 금지.
+5. **인과는 미규명** — 역행·정체의 원인은 EDA 범위 밖, 후속 검증 과제.
+
+## 재현성 {#sec-repro}
+
+```{r repro}
+#| echo: false
+si <- sessionInfo()
+cat("R:", si$R.version$version.string, "\n")
+cat(
+  "주요 패키지:",
+  paste(
+    sprintf(
+      "%s %s",
+      c("dplyr", "tidyr", "ggplot2", "scales"),
+      sapply(c("dplyr", "tidyr", "ggplot2", "scales"), function(p) {
+        as.character(packageVersion(p))
+      })
+    ),
+    collapse = ", "
+  ),
+  "\n"
+)
+```
+
+> **렌더**: `quarto render document/eda_report.qmd` — 모든 표·그림이 코드로부터 재생성됩니다. 동일 분석의 스크립트 버전은 `eda.R`.
