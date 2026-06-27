@@ -1,0 +1,11 @@
+/*-- scss:defaults --*/
+// 시스템 폰트 스택 사용 (외부 폰트 인라인 금지 → 페이지 경량 유지)
+$font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
+$primary:    #2A6F77;   // deep teal — 일관 악센트
+$body-color: #1f2933;
+$link-color: #2A6F77;
+
+/*-- scss:rules --*/
+.bslib-value-box .value-box-value { font-weight: 700; font-feature-settings: "tnum"; }
+.quarto-dashboard .card { border-color: #e6e9ec; }
+.navbar-title, .dashboard-title { font-weight: 700; letter-spacing: -.01em; }
